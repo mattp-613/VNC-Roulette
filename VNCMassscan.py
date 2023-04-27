@@ -26,7 +26,7 @@ def parseLine(line,number):
 def getIPs():
     masscanCommand = "masscan"
     #masscanParameter = '-p5900 0.0.0.0/0 --rate=100 --exclude 255.255.255.255 --output-format list --output-filename ips.txt'
-    call([masscanCommand, '-p5900', '0.0.0.0/0', '--rate=100', '--exclude', '255.255.255.255', '--output-format', 'list','--output-filename','ips.txt'])
+    call([masscanCommand, '-p5900', '0.0.0.0/0', '--rate=10', '--exclude', '255.255.255.255', '--output-format', 'list','--output-filename','ips.txt'])
 
 
 
@@ -36,12 +36,16 @@ def main():
     startLine = 1
     wasShown = False
 
-    ipgetter = threading.Thread(target=getIPs,args=())
-    ipgetter.start()
+    print('Press 1 for full scan then check password, press 2 for checking passwords: ')
+    x = input()
 
-
+    if(x != '2'):
+        print("you have chosen penis sex")
+        ipgetter = threading.Thread(target=getIPs,args=())
+        ipgetter.start()
 
     while True:
+        #print("you have chosen picture time")
         lineCounter = 1
         if os.path.isfile('ips.txt'):
             with open("ips.txt") as f:
