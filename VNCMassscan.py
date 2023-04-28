@@ -9,7 +9,7 @@ from filelock import FileLock
 def getIPs():
     masscanCommand = "masscan"
     #masscanParameter = '-p5900 0.0.0.0/0 --rate=100 --exclude 255.255.255.255 --output-format list --output-filename ips.txt'
-    call([masscanCommand, '-p5900', '0.0.0.0/0', '--rate=10', '--exclude', '255.255.255.255', '--output-format', 'list','--output-filename','ips.txt'])
+    call([masscanCommand, '-p5900', '0.0.0.0/0', '--rate=1000000000', '--exclude', '255.255.255.255', '--output-format', 'list','--output-filename','ips.txt'])
 
 
 def main():
