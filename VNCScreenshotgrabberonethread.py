@@ -10,7 +10,7 @@ def parseLine(line):
     #TODO add ability to edit "open" to "close" so as to not re-read the line
     
     try: 
-        client = api.connect('{ip}:0'.format(ip=parsedLine[3]),timeout=10)
+        client = api.connect('{ip}:0'.format(ip=parsedLine[3]),timeout=3)
         client.captureScreen('screenshot_IP_{ip}.png'.format(ip=parsedLine[3]))
         print('Got image from {ip}'.format(ip=parsedLine[3]))
         with FileLock("vulnerableIPs.txt"):
@@ -30,9 +30,7 @@ def main():
         with open('ips.txt') as f:
             lines = f.readlines() # list containing lines of file
             for line in lines:
-                thread = threading.Thread(target=parseLine, kwargs={'line':line})
-                thread.start()
-                    
+                parseLine(line)
 
 
 if __name__ == '__main__':
