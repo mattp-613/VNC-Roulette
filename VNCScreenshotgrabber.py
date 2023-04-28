@@ -9,8 +9,9 @@ from filelock import FileLock
 def parseLine(line):
 
     parsedLine = line.split(" ")
-    try:
-        client = api.connect("{ip}:0".format(ip=parsedLine[3]))
+    #TODO add ability to edit "open" to "close" so as to not re-read the line
+    try: 
+        client = api.connect('{ip}:0'.format(ip=parsedLine[3]),timeout=3)
         client.captureScreen('screenshot_IP_{ip}.png'.format(ip=parsedLine[3]))
         print('Got image from {ip}'.format(ip=parsedLine[3]))
         with FileLock("vulnerableIPs.txt"):
@@ -19,11 +20,12 @@ def parseLine(line):
 
     except:
         print('Cant get image from {ip}'.format(ip=parsedLine[3]))
+        #TODO add ability to edit "open" to "close" so as to not re-read the line
         pass
 
 
 def main():
-
+    #TODO: proper multithreading
     if os.path.isfile('ips.txt'):
         print('List of ips detected.')
         with open('ips.txt') as f:
