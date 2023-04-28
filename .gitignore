@@ -3,3 +3,4 @@ vulnerableIPs.txt
 paused.conf
 __pycache__
 *.txt
+/venv
