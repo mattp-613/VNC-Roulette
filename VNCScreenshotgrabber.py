@@ -1,6 +1,6 @@
 import os
 from subprocess import call
-import api
+from vncapi import api
 import os.path
 import threading
 from filelock import FileLock
@@ -12,7 +12,7 @@ def parseLine(line):
     parsedLine = line.split(" ")
     try:
         client = api.connect("{ip}:0".format(ip=parsedLine[3]))
-        print("connected to {ip}").format(ip=parsedLine[3])
+        print("connected to {ip}".format(ip=parsedLine[3]))
     except:
         print('Cant get image from {ip}'.format(ip=parsedLine[3]))
         pass
@@ -43,7 +43,6 @@ def main():
         with open('ips.txt') as f:
             lines = f.readlines() # list containing lines of file
             for line in lines:
-                print(line)
                 thread = threading.Thread(target=parseLine,  kwargs={'line':line})
                 thread.start()    
 
