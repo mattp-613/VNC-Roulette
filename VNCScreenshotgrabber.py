@@ -1,6 +1,6 @@
 import os
 from subprocess import call
-from vncapi import api
+import vncapi
 import os.path
 import threading
 from filelock import FileLock
@@ -10,7 +10,7 @@ def parseLine(line):
 
     parsedLine = line.split(" ")
     try:
-        client = api.connect("{ip}:0".format(ip=parsedLine[3]))
+        client = vncapi.api.connect("{ip}:0".format(ip=parsedLine[3]))
         client.captureScreen('screenshot_IP_{ip}.png'.format(ip=parsedLine[3]))
         print('Got image from {ip}'.format(ip=parsedLine[3]))
         with FileLock("vulnerableIPs.txt"):
