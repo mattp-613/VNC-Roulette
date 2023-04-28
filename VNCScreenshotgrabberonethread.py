@@ -1,8 +1,6 @@
 import os
-from subprocess import call
 from vncapi import api
 import os.path
-import threading
 from filelock import FileLock
 
 def parseLine(line):

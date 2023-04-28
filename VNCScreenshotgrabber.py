@@ -6,9 +6,6 @@ import threading
 from filelock import FileLock
 
 def parseLine(line):
-    parsedLine = line.split(" ")
-    #TODO add ability to edit "open" to "close" so as to not re-read the line
-    
     try: 
         client = api.connect('{ip}:0'.format(ip=parsedLine[3]),timeout=10)
         client.captureScreen('screenshot_IP_{ip}.png'.format(ip=parsedLine[3]))
@@ -21,7 +18,7 @@ def parseLine(line):
         print('Cant get image from {ip}'.format(ip=parsedLine[3]))
         #TODO add ability to edit "open" to "close" so as to not re-read the line
         pass
-
+                
 
 def main():
     #TODO: limit amount of threads multithreading
@@ -29,9 +26,32 @@ def main():
         print('List of ips detected.')
         with open('ips.txt') as f:
             lines = f.readlines() # list containing lines of file
+            ips = []
             for line in lines:
-                thread = threading.Thread(target=parseLine, kwargs={'line':line})
-                thread.start()
+                parsedLine = line.split(" ")
+                try:
+                    ips.append(parsedLine[3])
+                except:
+                    print("The following line does not work. Skipping line:")
+                    print(line)
+                    print("")
+            print("Done. Proceeding with screenshotting: ")
+
+            #thread = threading.Thread(target=parseLine, kwargs={'line':line})
+            #thread.start()
+            #TODO: Make the following a function!
+            maxThreads = 3
+            currentIndex = 0
+            ipThreadGap = len(ips) // maxThreads
+            nextIndex = ipThreadGap
+            #the index will be the thread number. the list will contain the ips it has to solve
+            ips_to_solve = []
+            for i in range(0, maxThreads):
+                temp = []
+                for x in range(currentIndex, nextIndex): #TODO: simplify with a range(0, ipThreadGap) and use current and next within the loop
+                    temp.append(ips[x])
+                currentIndex += ipThreadGap
+                nextIndex += ipThreadGap
                     
 
 
