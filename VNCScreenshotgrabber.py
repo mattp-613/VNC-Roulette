@@ -7,7 +7,7 @@ from filelock import FileLock
 
 
 def parseLine(line):
-
+    parseLine(line)
     parsedLine = line.split(" ")
     #TODO add ability to edit "open" to "close" so as to not re-read the line
     try: 
@@ -26,15 +26,15 @@ def parseLine(line):
 
 def main():
     #TODO: proper multithreading
-    if os.path.isfile('ips.txt'):
-        print('List of ips detected.')
-        with open('ips.txt') as f:
-            lines = f.readlines() # list containing lines of file
-            for line in lines:
-                print(line)
-                parseLine(line)
-                thread = threading.Thread(target=parseLine,  kwargs={'line':line})
-                thread.start()    
+    while True:
+        if os.path.isfile('ips.txt'):
+            print('List of ips detected.')
+            with open('ips.txt') as f:
+                lines = f.readlines() # list containing lines of file
+                for line in lines:
+                    print(line)
+                    thread = threading.Thread(target=parseLine, kwargs={'line':line})
+                    thread.start()
 
 
 if __name__ == '__main__':

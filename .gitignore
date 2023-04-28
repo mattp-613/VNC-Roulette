@@ -1,6 +1,7 @@
 ips.txt
 vulnerableIPs.txt
 paused.conf
-__pycache__
+__pycache__/
 *.txt
-/venv
+venv/
+.venv
