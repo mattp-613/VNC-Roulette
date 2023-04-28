@@ -8,16 +8,23 @@ from filelock import FileLock
 def attemptConnect(ips):
      for ip in ips:
         try:
-            client = api.connect('{ip}:0'.format(ip=ip),timeout=10, username='', password='')
-            client.captureScreen('screenshot_IP_{ip}.png'.format(ip=ip))
-            print('Got image from {ip}'.format(ip=ip))
-            with FileLock("vulnerableIPs.txt"):
-                    with open('vulnerableIPs.txt', 'a') as file:
-                        file.write(ip)
+            with open('nonVulnerableIPs.txt') as f: #if it has already not been found
+                if ip not in f.read():
+                    client = api.connect('{ip}:0'.format(ip=ip),timeout=10, username='', password='')
+                    client.captureScreen('screenshot_IP_{ip}.png'.format(ip=ip))
+                    print('Got image from {ip}'.format(ip=ip))
+                    #TODO: issue with filelock and appending.
+                    #TODO: see: https://stackoverflow.com/questions/58028033/how-to-append-text-into-file-when-using-filelock-acquire-function-python
+                    with FileLock("vulnerableIPs.txt.lock"):
+                            with open('vulnerableIPs.txt', "a") as file:
+                                file.write(ip + "\n")
         except:
             print('Cant get image from {ip}'.format(ip=ip))
             #TODO add ability to edit "open" to "close" so as to not re-read the line
-            pass
+            with FileLock("nonVulnerableIPs.txt.lock"):
+                    with open('nonVulnerableIPs.txt', "a") as file:
+                        file.write(ip + "\n")
+                        pass
 
 def createThread(maxThreads, ips):
         currentIndex = 0
