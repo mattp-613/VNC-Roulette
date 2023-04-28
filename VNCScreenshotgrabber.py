@@ -18,7 +18,21 @@ def parseLine(line):
         print('Cant get image from {ip}'.format(ip=parsedLine[3]))
         #TODO add ability to edit "open" to "close" so as to not re-read the line
         pass
-                
+
+def createThread(maxThreads, ips):
+        currentIndex = 0
+        ipThreadGap = len(ips) // maxThreads
+        nextIndex = ipThreadGap
+        #the index will be the thread number. the list will contain the ips it has to solve
+        ips_to_solve = []
+        for i in range(0, maxThreads):
+            temp = []
+            for x in range(currentIndex, nextIndex): #TODO: simplify with a range(0, ipThreadGap) and use current and next within the loop
+                temp.append(ips[x])
+            ips_to_solve.append(temp)
+            currentIndex += ipThreadGap
+            nextIndex += ipThreadGap 
+        return ips_to_solve
 
 def main():
     #TODO: limit amount of threads multithreading
@@ -39,20 +53,9 @@ def main():
 
             #thread = threading.Thread(target=parseLine, kwargs={'line':line})
             #thread.start()
-            #TODO: Make the following a function!
-            maxThreads = 3
-            currentIndex = 0
-            ipThreadGap = len(ips) // maxThreads
-            nextIndex = ipThreadGap
-            #the index will be the thread number. the list will contain the ips it has to solve
-            ips_to_solve = []
-            for i in range(0, maxThreads):
-                temp = []
-                for x in range(currentIndex, nextIndex): #TODO: simplify with a range(0, ipThreadGap) and use current and next within the loop
-                    temp.append(ips[x])
-                currentIndex += ipThreadGap
-                nextIndex += ipThreadGap
-                    
+            maxThreads = 2000
+            ips_to_multithread = createThread(maxThreads, ips)
+            print(len(ips_to_multithread))
 
 
 if __name__ == '__main__':
