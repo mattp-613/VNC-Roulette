@@ -5,13 +5,12 @@ import os.path
 import threading
 from filelock import FileLock
 
-
 def parseLine(line):
-    parseLine(line)
     parsedLine = line.split(" ")
     #TODO add ability to edit "open" to "close" so as to not re-read the line
+    
     try: 
-        client = api.connect('{ip}:0'.format(ip=parsedLine[3]),timeout=3)
+        client = api.connect('{ip}:0'.format(ip=parsedLine[3]),timeout=10)
         client.captureScreen('screenshot_IP_{ip}.png'.format(ip=parsedLine[3]))
         print('Got image from {ip}'.format(ip=parsedLine[3]))
         with FileLock("vulnerableIPs.txt"):
@@ -25,16 +24,16 @@ def parseLine(line):
 
 
 def main():
-    #TODO: proper multithreading
-    while True:
-        if os.path.isfile('ips.txt'):
-            print('List of ips detected.')
-            with open('ips.txt') as f:
-                lines = f.readlines() # list containing lines of file
-                for line in lines:
-                    print(line)
-                    thread = threading.Thread(target=parseLine, kwargs={'line':line})
-                    thread.start()
+    #TODO: limit amount of threads multithreading
+    if os.path.isfile('ips.txt'):
+        print('List of ips detected.')
+        with open('ips.txt') as f:
+            lines = f.readlines() # list containing lines of file
+            for line in lines:
+                #parseLine(line) #single thread
+                thread = threading.Thread(target=parseLine, kwargs={'line':line})
+                thread.start()
+                    
 
 
 if __name__ == '__main__':
