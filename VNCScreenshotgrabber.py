@@ -16,15 +16,16 @@ def attemptConnect(ips):
                         client = api.connect('{ip}:0'.format(ip=ip),timeout=10, username='', password='')
                         client.captureScreen('screenshot_IP_{ip}.png'.format(ip=ip))
                         print('Got image from {ip}'.format(ip=ip))
-                        with FileLock("vulnerableIPs.txt.lock"):
-                                with open('vulnerableIPs.txt', "a") as file:
+                        with FileLock("vulnerableIPs.txt.lock"): #TODO make non vulnernable ips a list of ALL ips checked, so we don't recsan 
+                                with open('vulnerableIPs.txt', "a") as file: 
                                     file.write(ip + "\n")
-                                    file.close()
+                                    file.close() #TODO: is there even a point to close these?
+                    f.close()
             except:
                 print('Cant get image from {ip}'.format(ip=ip))
                 #TODO add ability to edit "open" to "close" so as to not re-read the line
                 with FileLock("nonVulnerableIPs.txt.lock"):
-                        with open('nonVulnerableIPs.txt', "a") as file:
+                        with open('nonVulnerableIPs.txt', "a") as file: #TODO make non vulnernable ips a list of ALL ips checked, so we don't recsan 
                             file.write(ip + "\n")
                             file.close()
 
@@ -63,7 +64,7 @@ def parseIPs(textfile):
 
 def main():
     
-    maxThreads = 20
+    maxThreads = 50
     threadRestartTime = 120 #set to super high for no restart
     ip_file = 'ips.txt'
     ips_to_multithread = createThread(maxThreads, parseIPs(ip_file))
