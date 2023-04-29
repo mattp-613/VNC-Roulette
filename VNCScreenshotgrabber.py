@@ -4,24 +4,29 @@ from vncapi import api
 import os.path
 import threading
 from filelock import FileLock
+stopThreads = False
 
 def attemptConnect(ips):
+     global stopThreads
      for ip in ips:
-        try:
-            with open('nonVulnerableIPs.txt') as f: #TODO: remove this O(n^2) check with something linear
-                if ip not in f.read():
-                    client = api.connect('{ip}:0'.format(ip=ip),timeout=10, username='', password='')
-                    client.captureScreen('screenshot_IP_{ip}.png'.format(ip=ip))
-                    print('Got image from {ip}'.format(ip=ip))
-                    with FileLock("vulnerableIPs.txt.lock"):
-                            with open('vulnerableIPs.txt', "a") as file:
-                                file.write(ip + "\n")
-        except:
-            print('Cant get image from {ip}'.format(ip=ip))
-            #TODO add ability to edit "open" to "close" so as to not re-read the line
-            with FileLock("nonVulnerableIPs.txt.lock"):
-                    with open('nonVulnerableIPs.txt', "a") as file:
-                        file.write(ip + "\n")
+        if not stopThreads:
+            try:
+                with open('nonVulnerableIPs.txt') as f: #TODO: remove this O(n^2) check with something linear
+                    if ip not in f.read():
+                        client = api.connect('{ip}:0'.format(ip=ip),timeout=10, username='', password='')
+                        client.captureScreen('screenshot_IP_{ip}.png'.format(ip=ip))
+                        print('Got image from {ip}'.format(ip=ip))
+                        with FileLock("vulnerableIPs.txt.lock"):
+                                with open('vulnerableIPs.txt', "a") as file:
+                                    file.write(ip + "\n")
+                                    file.close()
+            except:
+                print('Cant get image from {ip}'.format(ip=ip))
+                #TODO add ability to edit "open" to "close" so as to not re-read the line
+                with FileLock("nonVulnerableIPs.txt.lock"):
+                        with open('nonVulnerableIPs.txt', "a") as file:
+                            file.write(ip + "\n")
+                            file.close()
 
 def createThread(maxThreads, ips):
         currentIndex = 0
@@ -52,28 +57,31 @@ def parseIPs(textfile):
                     print("The following line does not work. Skipping line:")
                     print(line)
                     print("")
+            f.close()
             print("Done. Proceeding with screenshotting: ")
     return ips
 
 def main():
     
-    maxThreads = 100
-    ips_to_multithread = createThread(maxThreads, parseIPs('ips.txt'))
+    maxThreads = 20
+    threadRestartTime = 120 #set to super high for no restart
+    ip_file = 'ips.txt'
+    ips_to_multithread = createThread(maxThreads, parseIPs(ip_file))
 
     #Due to an issue in the underlying API, all threads must be restarted.
     #This will resolve issues involving Twisted timeout and such, as this API is not meant to be multithreaded
     #Every time Twisted has an error due to connectivity, it will crash the thread. Thus, we must recreate all threads
     
     while True:
-        threadGroup = []
+        stopThreads = False
         for i in range(0, maxThreads):
             thread = threading.Thread(target=attemptConnect, kwargs={'ips':ips_to_multithread[i]})
-            threadGroup.append(thread)
             thread.start()
-        time.sleep(120)
-        for thread in threadGroup:
-                thread.kill()
+        
+        time.sleep(threadRestartTime)
+        stopThreads = True
         print("Restarting all threads...")
+        time.sleep(2)
                 
 
 
