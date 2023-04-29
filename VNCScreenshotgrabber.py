@@ -22,7 +22,6 @@ def attemptConnect(ips):
             with FileLock("nonVulnerableIPs.txt.lock"):
                     with open('nonVulnerableIPs.txt', "a") as file:
                         file.write(ip + "\n")
-                        #pass
 
 def createThread(maxThreads, ips):
         currentIndex = 0
@@ -39,8 +38,8 @@ def createThread(maxThreads, ips):
             nextIndex += ipThreadGap 
         return ips_to_solve
 
-def main():
-    if os.path.isfile('ips.txt'):
+def parseIPs(textfile):
+    if os.path.isfile(textfile):
         print('List of ips detected.')
         with open('ips.txt') as f:
             lines = f.readlines()
@@ -54,13 +53,28 @@ def main():
                     print(line)
                     print("")
             print("Done. Proceeding with screenshotting: ")
+    return ips
 
-            maxThreads = 200
-            ips_to_multithread = createThread(maxThreads, ips)
+def main():
+    
+    maxThreads = 100
+    ips_to_multithread = createThread(maxThreads, parseIPs('ips.txt'))
 
-            for i in range(0, maxThreads):
-                thread = threading.Thread(target=attemptConnect, kwargs={'ips':ips_to_multithread[i]})
-                thread.start()
+    #Due to an issue in the underlying API, all threads must be restarted.
+    #This will resolve issues involving Twisted timeout and such, as this API is not meant to be multithreaded
+    #Every time Twisted has an error due to connectivity, it will crash the thread. Thus, we must recreate all threads
+    
+    while True:
+        threadGroup = []
+        for i in range(0, maxThreads):
+            thread = threading.Thread(target=attemptConnect, kwargs={'ips':ips_to_multithread[i]})
+            threadGroup.append(thread)
+            thread.start()
+        time.sleep(120)
+        for thread in threadGroup:
+                thread.kill()
+        print("Restarting all threads...")
+                
 
 
 if __name__ == '__main__':

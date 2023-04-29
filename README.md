@@ -3,7 +3,9 @@ This script is taken from https://github.com/davidomil/VNCMassscan except fixed 
 
 Requirements:
 
-Python will tell you what to install when you attempt to run the scripts. Please use a venv environment when running these. Install in the environment vncdotool and twisted. The other dependencies are either included or you will be notified after attempting to run the script.
+Python will tell you what to install when you attempt to run the scripts. Please use a venv environment when running these. Install in the environment using pip both vncdotool and twisted. The other dependencies are either included or you will be notified after attempting to run the script. You will also need to install masscan. You can install it by compiling it from the github page here:
+
+https://github.com/robertdavidgraham/masscan
 
 Instructions:
 
