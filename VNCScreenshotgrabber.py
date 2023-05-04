@@ -29,12 +29,13 @@ def attemptConnect(ips):
                             file.write(ip + "\n")
                             file.close()
 
-def linearAttemptConnect(ips):
+def linearAttemptConnect(ips, searchingFile):
     #Similar to attemptConnect, however it removes the IP's already searched from their memory list 
     #and then saves the leftover IP's when the script is cancelled to the searchingFile
     #This script WILL REMOVE ips from the given file by overwriting them with the memory in the threads
     #However, this will be very very fast!
     global stopThreads
+    global clearedSearchingFile
     try:
         for ip in ips:
             if not stopThreads:
@@ -53,9 +54,21 @@ def linearAttemptConnect(ips):
                                 file.write(ip + "\n")
                                 file.close()
             ips.remove(ip)
+
     except KeyboardInterrupt:
-         #We want to clear the current searchingFile and replace it with all the IPs currently in memory
-         
+        #We want to clear the current searchingFile and replace it with all the IPs currently in memory
+        
+        #Firstly, check if a thread already cleared the file before this thread could
+        if not clearedSearchingFile:
+            with open(searchingFile,'w'):
+                pass
+
+        #Now, we save this threads ips to the file
+        for ip in ips:
+            with FileLock(searchingFile): 
+                                with open(searchingFile, "a") as file: 
+                                    file.write(ip + "\n")
+                                    file.close() #TODO: is there even a point to close these?
 
 def createSearchingFile(ipFile, searchingFile):
     print("Linear searching detected. We will now create a text file that is a copy of your current IPs. Creating text file of IPs to search...")
@@ -123,10 +136,11 @@ def main():
 
     while True:
         stopThreads = False
+        clearedSearchingFile = False
         for i in range(0, maxThreads):
 
             if(linear):
-                thread = threading.Thread(target=linearAttemptConnect, kwargs={'ips':ips_to_multithread[i]})
+                thread = threading.Thread(target=linearAttemptConnect, kwargs={'ips':ips_to_multithread[i], 'searchingFile':searchingFile})
                 thread.start()
             else:
                 thread = threading.Thread(target=attemptConnect, kwargs={'ips':ips_to_multithread[i]})
