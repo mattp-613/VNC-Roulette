@@ -63,6 +63,7 @@ def createSearchingFile(ipFile, searchingFile):
     print("Text file of IPs created. Beginning linear search...")
 
 def createThread(maxThreads, ips):
+        print(ips)
         currentIndex = 0
         ipThreadGap = len(ips) // maxThreads
         nextIndex = ipThreadGap
@@ -74,7 +75,7 @@ def createThread(maxThreads, ips):
                 temp.append(ips[x])
             ips_to_solve.append(temp)
             currentIndex += ipThreadGap
-            nextIndex += ipThreadGap 
+            nextIndex += ipThreadGap
         return ips_to_solve
 
 def parseIPs(textFile):
@@ -92,7 +93,7 @@ def parseIPs(textFile):
                     print(line)
                     print("")
             f.close()
-            print("Done. Proceeding with screenshotting: \n")
+    print("Done. Proceeding with screenshotting: \n")
     return ips
 
 def parseIPsLinearContinuous(textFile):
@@ -100,23 +101,18 @@ def parseIPsLinearContinuous(textFile):
         print('List of ips detected.')
         with open(textFile) as f:
             lines = f.readlines()
-            parsedLine = line.split(" ")
             ips = []
-            for line in lines:
-                print(line)
-                try:
-                    ips.append(line)
-                except:
-                    print("The following line does not work. Skipping line:")
-                    print(line)
-                    print("")
+            for i in range(0,len(lines)):
+                print(lines[i])
+                if i != 0:
+                    ips.append(lines[i].strip()) #remove \n
             f.close()
-            print("Done. Proceeding with screenshotting: \n")
+    print("Done. Proceeding with screenshotting: \n")
     return ips
 
 def main():
     
-    maxThreads = 50
+    maxThreads = 50 #Please ensure that the amount of ips outnumber the amount of threads significantly
     threadRestartTime = 120 #set to super high for no restart
     ipFile = 'ips.txt'
     searchingFile = 'ipsLeft.txt' #basically the amount of ips left to search
@@ -132,13 +128,13 @@ def main():
         with open(searchingFile) as f:
             lines = f.readlines()
             if lines[0] == 'Parsed\n':
-                ips_to_multithread = createThread(maxThreads, parseIPs(searchingFile))
+                ips_to_multithread = createThread(maxThreads, parseIPsLinearContinuous(searchingFile))
             else:
                 ips_to_multithread = createThread(maxThreads, parseIPs(ipFile))
 
     #Due to an issue in the underlying API, all threads must be restarted.
     #This will resolve issues involving Twisted timeout and such, as this API is not meant to be multithreaded
-    #Every time Twisted has an error due to connectivity, it will crash the thread. Thus, we must recreate all threads
+    #Every time Twisted has an error due to connec/tivity, it will crash the thread. Thus, we must recreate all threads
 
     unsaved = True
     while unsaved:
@@ -171,7 +167,9 @@ def main():
             print("Proceeding to write all leftover IPs to: " + searchingFile)
             for i in range(0, maxThreads):
                 ips = ips_to_multithread[i]
+                print(ips)
                 for ip in ips:
+                    print("Writing IP:" + ip)
                     with open(searchingFile, "a") as file: 
                         file.write(ip + "\n")
                         file.close() #TODO: is there even a point to close these?
