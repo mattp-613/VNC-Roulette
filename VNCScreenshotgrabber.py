@@ -7,7 +7,7 @@ import shutil
 from filelock import FileLock
 stopThreads = False
 unsaved = True
-logInsecureIPs = True
+logInsecureIPs = False
 
 def attemptConnect(ips):
     global stopThreads
@@ -92,6 +92,7 @@ def main():
     threadRestartTime = 120 #set to super high for no restart
     ipFile = 'ips.txt'
     searchingFile = 'ipsLeft.txt' #the file to work with
+    logInsecureIPs = False
 
     #if there is no searchingFile, create one with all the current ips
     if not os.path.isfile(searchingFile):
@@ -137,8 +138,9 @@ def main():
                 ips = ips_to_multithread[i]
                 with open(searchingFile, "a") as file: 
                     file.write('\n'.join(ips))
+                    file.write('\n')
                     file.close()
-            print("Progress saving complete. Exiting script.")
+            print("Progress saving complete. You may exit the script.")
 
 if __name__ == '__main__':
     #if os.geteuid() != 0:
