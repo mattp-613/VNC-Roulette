@@ -3,7 +3,7 @@ import time
 from vncapi import api
 import os.path
 import threading
-import json
+import shutil
 from filelock import FileLock
 stopThreads = False
 unsaved = True
@@ -34,11 +34,7 @@ def attemptConnect(ips):
 
 def createSearchingFile(ipFile, searchingFile):
     print("We will now create a text file that is a copy of your current IPs. Creating text file of IPs to search...")
-    with open(ipFile) as f:
-        lines = f.readlines()
-        for line in lines:
-            with open(searchingFile, "a") as file: 
-                file.write(line)
+    shutil.copyfile(ipFile,searchingFile)
     print("Text file of IPs created. Beginning linear search...")
 
 def createThread(maxThreads, ips):
@@ -127,7 +123,6 @@ def main():
             time.sleep(2)
 
         except:
-            print("INTERRUPTED!!!!!!!!")
             unsaved = False
             #We want to clear the current searchingFile and replace it with all the IPs currently in memory
             
@@ -137,14 +132,14 @@ def main():
                 file.close()
 
             #Now, we save this threads ips to the file
-            print("Proceeding to write all leftover IPs to: " + searchingFile)
+            print("\nProceeding to write all leftover IPs to: " + searchingFile)
             for i in range(0, maxThreads):
                 ips = ips_to_multithread[i]
                 for ip in ips:
                     with open(searchingFile, "a") as file: 
                         file.write(ip + "\n")
                         file.close() #TODO: is there even a point to close these?
-            print("Progress saving complete.")
+            print("Progress saving complete. Exiting script.")
 
 if __name__ == '__main__':
     #if os.geteuid() != 0:
