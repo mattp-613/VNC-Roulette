@@ -99,8 +99,9 @@ def parseIPs(textFile):
                     print(line)
                     print("")
             f.close()
-    print("Done. Proceeding with screenshotting: \n")
-    return ips
+        print("Done. Proceeding with screenshotting: \n")
+        return ips
+    print("No list of ips detected.")
 
 def parseIPsLinearContinuous(textFile):
     if os.path.isfile(textFile):
@@ -112,8 +113,10 @@ def parseIPsLinearContinuous(textFile):
                 if i != 0:
                     ips.append(lines[i].strip()) #remove \n
             f.close()
-    print("Done. Proceeding with screenshotting: \n")
-    return ips
+        print("Done. Proceeding with screenshotting: \n")
+        return ips
+        print("No list of ips detected.")
+
 
 def main():
     
