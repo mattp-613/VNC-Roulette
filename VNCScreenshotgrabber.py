@@ -87,7 +87,7 @@ def parseIPsContinuous(textFile):
             f.close()
         print("Done. Proceeding with screenshotting: \n")
         return ips
-        print("No list of ips detected.")
+    print("No list of ips detected.")
 
 
 def main():
