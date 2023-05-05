@@ -135,10 +135,9 @@ def main():
             print("\nProceeding to write all leftover IPs to: " + searchingFile)
             for i in range(0, maxThreads):
                 ips = ips_to_multithread[i]
-                for ip in ips:
-                    with open(searchingFile, "a") as file: 
-                        file.write(ip + "\n")
-                        file.close() #TODO: is there even a point to close these?
+                with open(searchingFile, "a") as file: 
+                    file.write('\n'.join(ips))
+                    file.close()
             print("Progress saving complete. Exiting script.")
 
 if __name__ == '__main__':
