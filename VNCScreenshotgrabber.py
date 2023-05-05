@@ -22,7 +22,7 @@ def attemptConnect(ips):
                 with FileLock("vulnerableIPs.txt.lock"): 
                         with open('vulnerableIPs.txt', "a") as file: 
                             file.write(ip + "\n")
-                            file.close() #TODO: is there even a point to close these?
+                            file.close()
             except:
                 print('Cant get image from {}'.format(ip))
                 if logInsecureIPs:
@@ -96,7 +96,7 @@ def main():
 
     #if there is no searchingFile, create one with all the current ips
     if not os.path.isfile(searchingFile):
-        createSearchingFile(ipFile, searchingFile) #TODO: Make this more efficient and less shitty
+        createSearchingFile(ipFile, searchingFile)
 
     with open(searchingFile) as f:
         lines = f.readlines()
