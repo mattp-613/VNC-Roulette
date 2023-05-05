@@ -7,9 +7,11 @@ import json
 from filelock import FileLock
 stopThreads = False
 unsaved = True
+logInsecureIPs = True
 
 def attemptConnect(ips):
      global stopThreads
+     global logInsecureIPs
      for ip in ips:
         if not stopThreads:
             try:
@@ -25,18 +27,20 @@ def attemptConnect(ips):
                     f.close()
             except:
                 print('Cant get image from {}'.format(ip))
-                with FileLock("nonVulnerableIPs.txt.lock"):
-                        with open('nonVulnerableIPs.txt', "a") as file:
-                            file.write(ip + "\n")
-                            file.close()
+                if logInsecureIPs:
+                    with FileLock("nonVulnerableIPs.txt.lock"):
+                            with open('nonVulnerableIPs.txt', "a") as file:
+                                file.write(ip + "\n")
+                                file.close()
 
-def linearAttemptConnect(ips, searchingFile):
+def linearAttemptConnect(ips):
     #Similar to attemptConnect, however it removes the IP's already searched from their memory list 
     #and then saves the leftover IP's when the script is cancelled to the searchingFile
     #This script WILL REMOVE ips from the given file by overwriting them with the memory in the threads
     #However, this will be very very fast!
     global stopThreads
     global unsaved
+    global logInsecureIPs
     for ip in ips:
         if not stopThreads and unsaved:
             try:
@@ -49,10 +53,11 @@ def linearAttemptConnect(ips, searchingFile):
                             file.close() #TODO: is there even a point to close these?
             except:
                 print('Cant get image from {}'.format(ip))
-                with FileLock("nonVulnerableIPs.txt.lock"):
-                        with open('nonVulnerableIPs.txt', "a") as file:
-                            file.write(ip + "\n")
-                            file.close()
+                if logInsecureIPs:
+                    with FileLock("nonVulnerableIPs.txt.lock"):
+                            with open('nonVulnerableIPs.txt', "a") as file:
+                                file.write(ip + "\n")
+                                file.close()
         ips.remove(ip) #it should ALWAYS remove index[0]
 
 def createSearchingFile(ipFile, searchingFile):
@@ -117,6 +122,7 @@ def main():
     ipFile = 'ips.txt'
     searchingFile = 'ipsLeft.txt' #basically the amount of ips left to search. THis is only used for linear search
     linear = True #set to false for non-linear searching with logging (very slow!)
+    logInsecureIPs = False #Option on whether or not to log insecure IPs to nonVulnerableIPs.txt
 
     #if there is no searchingFile, create one with all the current ips
     if(linear):
@@ -124,7 +130,7 @@ def main():
             createSearchingFile(ipFile, searchingFile) #TODO: Make this more efficient and less shitty
 
     if(linear):
-        
+
         with open(searchingFile) as f:
             lines = f.readlines()
             if lines[0] == 'Parsed\n':
@@ -143,7 +149,7 @@ def main():
             for i in range(0, maxThreads):
 
                 if(linear):
-                    thread = threading.Thread(target=linearAttemptConnect, kwargs={'ips':ips_to_multithread[i], 'searchingFile':searchingFile})
+                    thread = threading.Thread(target=linearAttemptConnect, kwargs={'ips':ips_to_multithread[i]})
                     thread.start()
                 else:
                     thread = threading.Thread(target=attemptConnect, kwargs={'ips':ips_to_multithread[i]})
@@ -153,9 +159,10 @@ def main():
             stopThreads = True
             print("Restarting all threads...")
             time.sleep(2)
-        
+
         except:
             print("INTERRUPTED!!!!!!!!")
+            unsaved = False
             #We want to clear the current searchingFile and replace it with all the IPs currently in memory
             
             #Firstly, we clear the file
@@ -172,8 +179,6 @@ def main():
                         file.write(ip + "\n")
                         file.close() #TODO: is there even a point to close these?
             print("Progress saving complete.")
-            unsaved = False
-
 
 if __name__ == '__main__':
     #if os.geteuid() != 0:
