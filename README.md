@@ -1,5 +1,11 @@
 # VNC-Roulette
-This script is taken from https://github.com/davidomil/VNCMassscan except fixed up to not be a total piece of shit
+Notice:
+
+Use the scripts included in this repository responsibly. Everything here is made for educational and/or research purposes.
+
+Intro:
+
+This script is taken from https://github.com/davidomil/VNCMassscan except fixed up to not be a total piece of shit. I didn't like the way they made it at all, though they did have the right idea and used the correct dependencies. Their approach was very weird and awkward, so I corrected it in my view of what it should be like. For example, multithreading here is solved by dividing the list of ips amongst all the threads and giving them their own chunk of ips to solve. In that script, each ip had its own thread, which would runtime error (duh???)
 
 Requirements:
 
@@ -9,8 +15,8 @@ https://github.com/robertdavidgraham/masscan
 
 Instructions:
 
-Run the VNC Mass Scanner first to scan the entire internet for available VNC Ips. It'll add them to a .txt file. The script has no option to resume, and it shouldn't need an option as you can bang this out easily in an hour. Change the rate if necessary, it is preset to a gignatic value so it goes as fast as possible.
+Run the VNC Mass Scanner first to scan the entire internet for available VNC Ips. It'll add them to a .txt file. This script has no option to resume, and it shouldn't need an option as you can bang this out easily in ten hours. Change the rate if necessary, it is preset to a gignatic value so it goes as fast as possible.
 
-Next, run the screenshot tool. This will provide screenshots of vulnerable VNC servers with their IP included in the title of the image. It will read from the ips.txt file that the scanner provides.
+Next, run the screenshot tool. This will provide screenshots of vulnerable VNC servers with their IP included in the title of the image. It will read from the ips.txt file that the scanner provides. There is both a linear mode and a non-linear mode as of now. Use the linear mode for optimal performance.
 
-usually adding "ulimit -n 50000" to the terminal running the script will resolve a bug in access limits
+usually adding "ulimit -n 50000" to the terminal running the script will resolve a bug in access limits to the .txt files
