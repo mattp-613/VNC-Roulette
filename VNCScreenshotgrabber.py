@@ -6,6 +6,7 @@ import threading
 import json
 from filelock import FileLock
 stopThreads = False
+unsaved = True
 
 def attemptConnect(ips):
      global stopThreads
@@ -35,8 +36,9 @@ def linearAttemptConnect(ips, searchingFile):
     #This script WILL REMOVE ips from the given file by overwriting them with the memory in the threads
     #However, this will be very very fast!
     global stopThreads
+    global unsaved
     for ip in ips:
-        if not stopThreads:
+        if not stopThreads and unsaved:
             try:
                 client = api.connect('{}:0'.format(ip),timeout=10, username='', password='')
                 client.captureScreen('screenshot_IP_{}.png'.format(ip))
@@ -63,7 +65,6 @@ def createSearchingFile(ipFile, searchingFile):
     print("Text file of IPs created. Beginning linear search...")
 
 def createThread(maxThreads, ips):
-        print(ips)
         currentIndex = 0
         ipThreadGap = len(ips) // maxThreads
         nextIndex = ipThreadGap
@@ -103,7 +104,6 @@ def parseIPsLinearContinuous(textFile):
             lines = f.readlines()
             ips = []
             for i in range(0,len(lines)):
-                print(lines[i])
                 if i != 0:
                     ips.append(lines[i].strip()) #remove \n
             f.close()
@@ -115,13 +115,13 @@ def main():
     maxThreads = 50 #Please ensure that the amount of ips outnumber the amount of threads significantly
     threadRestartTime = 120 #set to super high for no restart
     ipFile = 'ips.txt'
-    searchingFile = 'ipsLeft.txt' #basically the amount of ips left to search
+    searchingFile = 'ipsLeft.txt' #basically the amount of ips left to search. THis is only used for linear search
     linear = True #set to false for non-linear searching with logging (very slow!)
 
     #if there is no searchingFile, create one with all the current ips
     if(linear):
         if not os.path.isfile(searchingFile):
-            createSearchingFile(ipFile, searchingFile)
+            createSearchingFile(ipFile, searchingFile) #TODO: Make this more efficient and less shitty
 
     if(linear):
         
@@ -167,9 +167,7 @@ def main():
             print("Proceeding to write all leftover IPs to: " + searchingFile)
             for i in range(0, maxThreads):
                 ips = ips_to_multithread[i]
-                print(ips)
                 for ip in ips:
-                    print("Writing IP:" + ip)
                     with open(searchingFile, "a") as file: 
                         file.write(ip + "\n")
                         file.close() #TODO: is there even a point to close these?
