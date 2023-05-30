@@ -15,6 +15,8 @@ https://github.com/robertdavidgraham/masscan
 
 Instructions:
 
+Note: Mass scanning or scanning unauthorized IP's for an open port is NOT allowed nor do I believe (not legal advice) is allowed unless permitted. Modify the scanner to scan addresses from a range that you are permitted to do so by, or do not use the scanner at all and manually add IP's to a text file.
+
 Run the VNC Mass Scanner first to scan the entire internet for available VNC Ips. It'll add them to a .txt file. This script has no option to resume, and it shouldn't need an option as you can bang this out easily in ten hours. Change the rate if necessary, it is preset to a gignatic value so it goes as fast as possible.
 
 Next, run the screenshot tool. This will provide screenshots of vulnerable VNC servers with their IP included in the title of the image. It will read from the ips.txt file that the scanner provides.
